@@ -8,8 +8,9 @@ The notebook models drug candidate prioritization as a two-step ML plus quantum 
 - train classical ML models to predict measured aqueous solubility
 - use the best ML model's predictions as candidate scores
 - reward simple developability-style descriptor targets
+- solve the same toy selection problem with simulated annealing
 - solve the toy problem with QAOA
-- compare QAOA selection against a brute-force classical optimizer
+- compare simulated annealing and QAOA selection against a brute-force classical optimizer
 
 ## Project Files
 
@@ -40,7 +41,7 @@ notebooks/qaoa_drug_candidate_selection.ipynb
 This is a toy educational project. It does not perform real molecular docking or clinical prediction. The goal is to show the correct division of labor:
 
 - Classical ML predicts a molecular property.
-- QAOA optimizes which molecules to select under constraints.
+- Classical and quantum optimizers decide which molecules to select under constraints.
 
 ## Dataset
 

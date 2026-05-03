@@ -4,7 +4,7 @@
 
 Build a simple Jupyter notebook that demonstrates how classical machine learning and the Quantum Approximate Optimization Algorithm (QAOA) can be combined for a pharma-inspired drug candidate selection problem using a real public molecular dataset.
 
-The project uses the Delaney ESOL dataset from MoleculeNet/DeepChem. Each molecule has a SMILES string, measured log aqueous solubility, and molecular descriptors. The notebook trains classical ML models to predict solubility, creates a small out-of-sample candidate pool, formulates a binary optimization problem using predicted solubility-derived scores, solves it with QAOA using IBM Qiskit, and compares the result against a brute-force classical optimizer.
+The project uses the Delaney ESOL dataset from MoleculeNet/DeepChem. Each molecule has a SMILES string, measured log aqueous solubility, and molecular descriptors. The notebook trains classical ML models to predict solubility, creates a small out-of-sample candidate pool, formulates a binary optimization problem using predicted solubility-derived scores, solves it with simulated annealing and QAOA using IBM Qiskit, and compares both approximate methods against a brute-force classical optimizer.
 
 ## 2. Problem Statement
 
@@ -19,6 +19,7 @@ This project creates a tiny educational version of that decision problem:
 - Demonstrate the correct split between ML prediction and QAOA optimization.
 - Train simple classical ML baselines for solubility prediction.
 - Demonstrate QAOA on a clear pharma-style selection problem.
+- Add simulated annealing as a scalable classical heuristic baseline.
 - Use a real public dataset while keeping the QAOA candidate pool small enough to run on a laptop simulator.
 - Show the full workflow from problem definition to Qiskit implementation.
 - Compare the QAOA result against a brute-force classical optimizer.
@@ -61,17 +62,18 @@ The notebook must:
 - Formulate a binary optimization problem with one decision variable per molecule.
 - Add a constraint that exactly three molecules must be selected.
 - Solve the problem with a brute-force classical baseline.
+- Solve the same constrained selection problem with simulated annealing.
 - Convert the optimization problem to QUBO form.
 - Solve the QUBO using QAOA from Qiskit.
 - Decode the selected molecules from the QAOA result.
-- Compare QAOA and brute-force results.
-- Visualize candidate scores and highlight the selected QAOA molecules.
+- Compare simulated annealing, QAOA, and brute-force results.
+- Visualize candidate scores and highlight the selected QAOA and simulated annealing molecules.
 
 ## 8. Success Criteria
 
 - The notebook runs top-to-bottom in a fresh Python environment after installing `requirements.txt`.
 - The notebook produces a selected subset of three molecules.
-- The ML baseline metrics, brute-force optimizer output, and QAOA output are displayed clearly.
+- The ML baseline metrics, brute-force optimizer output, simulated annealing output, and QAOA output are displayed clearly.
 - At least one chart is generated.
 - The notebook text explains that this is a toy educational example.
 
@@ -151,9 +153,10 @@ Implementation steps:
 6. Build a `QuadraticProgram`.
 7. Add binary variables and selection constraint.
 8. Solve exact optimizer baseline by enumerating all combinations.
-9. Convert the problem to QUBO.
-10. Run QAOA with a small number of reps.
-11. Interpret and visualize the result.
+9. Run simulated annealing with swap moves that preserve the exact-three selection constraint.
+10. Convert the problem to QUBO.
+11. Run QAOA with a small number of reps.
+12. Interpret and visualize the result.
 
 ## 11. Risks and Constraints
 
@@ -169,5 +172,5 @@ Implementation steps:
 - Add larger candidate sets.
 - Include additional constraints such as maximum toxicity or total budget.
 - Replace synthetic scores with public docking or QSAR-style sample data.
-- Compare QAOA against simulated annealing or classical integer programming.
+- Compare QAOA against classical integer programming.
 - Add sampled bitstring probability visualization.
