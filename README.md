@@ -15,6 +15,7 @@ The notebook models drug candidate prioritization as a two-step ML plus quantum 
 ## Project Files
 
 - `docs/PRD.md` - product requirements document
+- `docs/architecture.md` - QAOA and VQE architecture: pipelines, circuit structure, data flow
 - `notebooks/qaoa_drug_candidate_selection.ipynb` - main implementation notebook
 - `notebooks/large_scale_drug_portfolio_qaoa_concept.ipynb` - large-scale portfolio selection concept notebook
 - `notebooks/vqe_esol_active_space_demo.ipynb` - VQE molecular energy demo using three small ESOL candidates

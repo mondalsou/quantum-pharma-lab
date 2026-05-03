@@ -9,3 +9,5 @@ matplotlib>=3.8
 numpy>=1.26
 pandas>=2.2
 scikit-learn>=1.4
+docplex>=2.25
+scipy>=1.12
