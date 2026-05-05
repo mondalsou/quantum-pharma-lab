@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Algorithm Notes — Quantum Pharma</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Caveat+Brush&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #fdf9f0;
+    --paper-dark: #f5eed8;
+    --ink: #1a1a2e;
+    --ink-light: #3a3a5c;
+    --accent-blue: #1e6091;
+    --accent-red: #c0392b;
+    --accent-green: #1a7a4a;
+    --accent-purple: #6c3483;
+    --accent-orange: #d35400;
+    --rule-line: #c8b99a;
+    --margin-line: #e88080;
+    --highlight-yellow: #fff176;
+    --highlight-pink: #fce4ec;
+    --highlight-blue: #e3f2fd;
+    --highlight-green: #e8f5e9;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #d4c5a9;
+    background-image:
+      radial-gradient(ellipse at 20% 30%, #c4b49a 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 70%, #bfae98 0%, transparent 60%);
+    min-height: 100vh;
+    padding: 30px 20px;
+    font-family: 'Caveat', cursive;
+  }
+
+  /* Cover page */
+  .cover {
+    max-width: 780px;
+    margin: 0 auto 40px;
+    background: var(--paper);
+    border-radius: 3px;
+    box-shadow: 4px 6px 20px rgba(0,0,0,0.25), -1px -1px 4px rgba(0,0,0,0.1);
+    padding: 60px 80px 50px;
+    position: relative;
+    border-left: 4px solid #a0956e;
+    overflow: hidden;
+  }
+
+  .cover::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 60px;
+    width: 2px; height: 100%;
+    background: var(--margin-line);
+    opacity: 0.5;
+  }
+
+  .cover-spiral {
+    position: absolute;
+    top: 0; left: 0;
+    width: 55px; height: 100%;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 28px,
+      #bbb 28px,
+      #bbb 30px
+    );
+    opacity: 0.3;
+  }
+
+  .cover h1 {
+    font-family: 'Caveat Brush', cursive;
+    font-size: 2.8rem;
+    color: var(--accent-blue);
+    line-height: 1.1;
+    margin-bottom: 12px;
+    transform: rotate(-1deg);
+  }
+
+  .cover .subtitle {
+    font-size: 1.4rem;
+    color: var(--ink-light);
+    margin-bottom: 30px;
+    transform: rotate(0.5deg);
+  }
+
+  .cover .toc {
+    background: var(--highlight-yellow);
+    border: 2px solid #f9c74f;
+    border-radius: 4px;
+    padding: 16px 20px;
+    transform: rotate(-0.5deg);
+    display: inline-block;
+    width: 100%;
+  }
+
+  .cover .toc h3 {
+    font-size: 1.3rem;
+    color: var(--accent-orange);
+    margin-bottom: 10px;
+  }
+
+  .cover .toc ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .cover .toc li {
+    font-size: 1.2rem;
+    color: var(--ink);
+    padding: 3px 0;
+  }
+
+  .cover .toc li::before {
+    content: '→ ';
+    color: var(--accent-red);
+  }
+
+  .cover .sticky {
+    position: absolute;
+    top: 30px; right: 50px;
+    background: #fff9c4;
+    border: 1px solid #f9c74f;
+    padding: 12px 16px;
+    width: 160px;
+    font-size: 1rem;
+    color: var(--ink);
+    transform: rotate(3deg);
+    box-shadow: 2px 3px 8px rgba(0,0,0,0.15);
+    line-height: 1.5;
+  }
+
+  /* Page */
+  .page {
+    max-width: 780px;
+    margin: 0 auto 40px;
+    background: var(--paper);
+    border-radius: 3px;
+    box-shadow: 4px 6px 20px rgba(0,0,0,0.25), -1px -1px 4px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+    border-left: 4px solid #a0956e;
+  }
+
+  /* Ruled lines */
+  .page-inner {
+    padding: 20px 50px 40px 80px;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 31px,
+      var(--rule-line) 31px,
+      var(--rule-line) 32px
+    );
+    background-size: 100% 32px;
+    background-position: 0 24px;
+    min-height: 400px;
+  }
+
+  /* Margin line */
+  .page::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 60px;
+    width: 2px; height: 100%;
+    background: var(--margin-line);
+    opacity: 0.5;
+    z-index: 1;
+  }
+
+  /* Page number hole punch */
+  .hole {
+    position: absolute;
+    top: 50%;
+    left: 18px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #d4c5a9;
+    border: 2px solid #b8a88a;
+    box-shadow: inset 1px 1px 4px rgba(0,0,0,0.2);
+    transform: translateY(-50%);
+  }
+
+  /* Section header */
+  .algo-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 16px 0 20px;
+    padding-bottom: 6px;
+    border-bottom: 3px solid;
+  }
+
+  .algo-header.qaoa { border-color: var(--accent-blue); }
+  .algo-header.sa   { border-color: var(--accent-green); }
+  .algo-header.vqe  { border-color: var(--accent-purple); }
+
+  .algo-badge {
+    font-family: 'Caveat Brush', cursive;
+    font-size: 1.5rem;
+    padding: 4px 14px;
+    border-radius: 20px;
+    color: white;
+    display: inline-block;
+    transform: rotate(-2deg);
+  }
+
+  .badge-blue   { background: var(--accent-blue); }
+  .badge-green  { background: var(--accent-green); }
+  .badge-purple { background: var(--accent-purple); }
+
+  .algo-title {
+    font-family: 'Caveat Brush', cursive;
+    font-size: 1.8rem;
+    line-height: 1.1;
+  }
+
+  .qaoa .algo-title { color: var(--accent-blue); }
+  .sa   .algo-title { color: var(--accent-green); }
+  .vqe  .algo-title { color: var(--accent-purple); }
+
+  /* Content blocks */
+  h2 {
+    font-size: 1.4rem;
+    margin: 22px 0 8px;
+    display: inline-block;
+    padding-bottom: 2px;
+    border-bottom: 2px solid currentColor;
+  }
+
+  h2.blue   { color: var(--accent-blue); }
+  h2.green  { color: var(--accent-green); }
+  h2.purple { color: var(--accent-purple); }
+  h2.orange { color: var(--accent-orange); }
+  h2.red    { color: var(--accent-red); }
+
+  p, li {
+    font-size: 1.2rem;
+    line-height: 2.0;
+    color: var(--ink);
+  }
+
+  ul, ol {
+    padding-left: 22px;
+    margin-bottom: 10px;
+  }
+
+  li { margin-bottom: 2px; }
+
+  strong {
+    color: var(--accent-red);
+  }
+
+  em {
+    color: var(--accent-blue);
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  /* Callout boxes */
+  .box {
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin: 16px 0;
+    position: relative;
+  }
+
+  .box-yellow {
+    background: var(--highlight-yellow);
+    border-left: 5px solid #f9c74f;
+    transform: rotate(-0.3deg);
+  }
+
+  .box-blue {
+    background: var(--highlight-blue);
+    border-left: 5px solid var(--accent-blue);
+    transform: rotate(0.2deg);
+  }
+
+  .box-green {
+    background: var(--highlight-green);
+    border-left: 5px solid var(--accent-green);
+    transform: rotate(-0.2deg);
+  }
+
+  .box-pink {
+    background: var(--highlight-pink);
+    border-left: 5px solid var(--accent-red);
+    transform: rotate(0.3deg);
+  }
+
+  .box-label {
+    font-family: 'Caveat Brush', cursive;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  /* Formula / pseudocode block */
+  .formula {
+    background: #fefefe;
+    border: 2px dashed #c0b090;
+    border-radius: 6px;
+    padding: 14px 20px;
+    margin: 14px 0;
+    font-family: 'Caveat', cursive;
+    font-size: 1.15rem;
+    line-height: 1.9;
+    color: var(--ink);
+  }
+
+  .formula .label {
+    font-family: 'Caveat Brush', cursive;
+    font-size: 1rem;
+    color: #888;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  /* ASCII diagram */
+  .diagram {
+    background: #fff;
+    border: 2px solid #d4c8a8;
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin: 14px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 0.78rem;
+    line-height: 1.55;
+    color: var(--ink);
+    overflow-x: auto;
+    white-space: pre;
+  }
+
+  .diagram .diagram-title {
+    font-family: 'Caveat Brush', cursive;
+    font-size: 1rem;
+    color: #888;
+    margin-bottom: 8px;
+    display: block;
+    white-space: normal;
+  }
+
+  /* Comparison table */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0;
+    font-size: 1.1rem;
+  }
+
+  th {
+    background: var(--ink);
+    color: white;
+    padding: 8px 12px;
+    text-align: left;
+    font-weight: 600;
+  }
+
+  td {
+    padding: 7px 12px;
+    border-bottom: 1px solid var(--rule-line);
+  }
+
+  tr:nth-child(even) td {
+    background: #f9f5ec;
+  }
+
+  /* Sticky note */
+  .sticky-note {
+    position: absolute;
+    background: #fff9c4;
+    border: 1px solid #f9e44f;
+    padding: 10px 14px;
+    font-size: 1rem;
+    line-height: 1.5;
+    box-shadow: 2px 3px 8px rgba(0,0,0,0.12);
+    max-width: 160px;
+    color: var(--ink);
+  }
+
+  .sticky-green {
+    background: #e8f5e9;
+    border-color: #a5d6a7;
+  }
+
+  .sticky-blue {
+    background: #e3f2fd;
+    border-color: #90caf9;
+  }
+
+  /* Page divider */
+  .divider {
+    border: none;
+    border-top: 2px dashed var(--rule-line);
+    margin: 28px 0;
+  }
+
+  /* Highlight text inline */
+  .hl-y { background: #fff176; padding: 1px 4px; border-radius: 3px; }
+  .hl-p { background: #fce4ec; padding: 1px 4px; border-radius: 3px; }
+  .hl-b { background: #e3f2fd; padding: 1px 4px; border-radius: 3px; }
+  .hl-g { background: #e8f5e9; padding: 1px 4px; border-radius: 3px; }
+
+  /* Underline styles */
+  .und-w { text-decoration: underline; text-decoration-color: #f9c74f; text-decoration-thickness: 3px; }
+  .und-r { text-decoration: underline; text-decoration-color: var(--accent-red); text-decoration-thickness: 3px; }
+
+  /* Pencil arrow connector */
+  .arrow-note {
+    font-size: 1.05rem;
+    color: #666;
+    margin-left: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .arrow-note::before { content: '↳'; color: var(--accent-orange); }
+
+  /* Page number */
+  .page-num {
+    position: absolute;
+    bottom: 12px;
+    right: 20px;
+    font-size: 0.95rem;
+    color: #aaa;
+  }
+
+  /* Section separator tape */
+  .tape {
+    display: inline-block;
+    background: rgba(255,241,118,0.7);
+    padding: 2px 16px;
+    transform: rotate(-1deg);
+    font-size: 1rem;
+    color: var(--ink-light);
+    margin: 10px 0;
+    border: 1px solid rgba(249,199,79,0.5);
+  }
+
+  .tape-blue {
+    background: rgba(144,202,249,0.5);
+    border-color: rgba(100,160,230,0.5);
+  }
+
+  .tape-green {
+    background: rgba(165,214,167,0.5);
+    border-color: rgba(100,180,100,0.5);
+  }
+
+  .tape-purple {
+    background: rgba(206,147,216,0.4);
+    border-color: rgba(160,100,200,0.4);
+  }
+
+  /* Example block */
+  .example-block {
+    background: white;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin: 18px 0;
+    position: relative;
+  }
+
+  .example-tag {
+    position: absolute;
+    top: -14px;
+    left: 16px;
+    background: var(--accent-orange);
+    color: white;
+    font-family: 'Caveat Brush', cursive;
+    font-size: 1rem;
+    padding: 2px 12px;
+    border-radius: 12px;
+    transform: rotate(-1deg);
+  }
+
+  .example-tag.blue { background: var(--accent-blue); }
+  .example-tag.green { background: var(--accent-green); }
+  .example-tag.purple { background: var(--accent-purple); }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════ COVER ═══════════════════════════ -->
+<div class="cover">
+  <div class="cover-spiral"></div>
+  <div class="hole" style="top:30px; transform:none;"></div>
+  <div class="hole" style="top:50%; transform:translateY(-50%);"></div>
+  <div class="hole" style="bottom:30px; top:auto; transform:none;"></div>
+
+  <div class="sticky">
+    ✏️ These are study notes — not production docs!<br><br>
+    Read with coffee ☕
+  </div>
+
+  <h1>Quantum Optimization<br>Algorithm Notes</h1>
+  <p class="subtitle">How the algorithms actually work — and how to use them</p>
+
+  <div class="toc">
+    <h3>📋 Table of Contents</h3>
+    <ul>
+      <li>QAOA — Quantum Approximate Optimization Algorithm</li>
+      <li>SA / PT — Simulated Annealing &amp; Parallel Tempering</li>
+      <li>VQE — Variational Quantum Eigensolver</li>
+      <li>Side-by-side comparison at the end</li>
+    </ul>
+  </div>
+
+  <p style="margin-top:24px; font-size:1.05rem; color:#888; transform:rotate(0.5deg);">
+    Context: quantum-pharma-lab project · Qiskit + Python · concepts + fresh examples
+  </p>
+  <div class="page-num">pg. 0</div>
+</div>
+
+
+<!-- ═══════════════════════════════ PAGE 1 — QAOA ═══════════════════ -->
+<div class="page">
+  <div class="hole" style="top:50%; left:18px; transform:translateY(-50%); position:absolute; width:22px; height:22px; border-radius:50%; background:#d4c5a9; border:2px solid #b8a88a; box-shadow:inset 1px 1px 4px rgba(0,0,0,0.2);"></div>
+
+  <div class="page-inner">
+
+    <div class="algo-header qaoa">
+      <span class="algo-badge badge-blue">① QAOA</span>
+      <span class="algo-title">Quantum Approximate Optimization Algorithm</span>
+    </div>
+
+    <!-- ── WHAT IS IT ── -->
+    <h2 class="blue">What is it, fundamentally?</h2>
+
+    <div class="box box-blue">
+      <span class="box-label" style="color:var(--accent-blue);">💡 Core Idea</span>
+      <p>QAOA is a <strong>hybrid quantum-classical algorithm</strong> for solving <em>combinatorial optimization</em> problems. It encodes the problem into a quantum circuit, then uses a classical optimizer to tune the circuit's parameters until the circuit "prefers" the best solution.</p>
+    </div>
+
+    <p>Think of it like this: you have a landscape of possible solutions. Classical algorithms walk across it step by step. QAOA uses <em>quantum superposition</em> to explore many solutions at once, and <em>quantum interference</em> to make good solutions more probable and bad ones less probable.</p>
+
+    <div class="diagram"><span class="diagram-title">// QAOA Circuit — big picture (p=2 layers)</span>
+ |0...0⟩  →  H⊗n  →  Cost(γ₁) → Mixer(β₁)  →  Cost(γ₂) → Mixer(β₂)  →  Measure
+              ↑              ↑              ↑
+         superpose     phases by        tunnels
+         everything   objective        between
+         equally        value          states</div>
+
+    <ul>
+      <li><strong>Cost layer</strong>: rotates each basis state's phase by how good that solution is. Amplifies good ones.</li>
+      <li><strong>Mixer layer</strong>: X-rotations that let the state "hop" between solutions — like quantum tunneling.</li>
+      <li><strong>p (depth)</strong>: more layers → better approximation, but deeper circuit (harder on real hardware).</li>
+      <li><strong>γ, β</strong>: the parameters that COBYLA/L-BFGS tune classically to minimize ⟨H⟩.</li>
+    </ul>
+
+    <div class="formula">
+      <span class="label">// Objective function QAOA minimizes:</span>
+      ⟨ψ(γ,β) | H_cost | ψ(γ,β)⟩  →  minimize this
+
+      where H_cost encodes:  maximize  Σ score_i · x_i
+                             subject to  Σ x_i = K  (exactly K selected)
+                             x_i ∈ {0, 1}
+
+      Equality constraint → QUBO penalty term:  +P · (Σ x_i − K)²
+    </div>
+
+    <!-- ── HOW PEOPLE USE IT ── -->
+    <h2 class="blue" style="margin-top:26px;">How people normally use QAOA</h2>
+
+    <ul>
+      <li>Portfolio selection (finance: pick K assets that maximize expected return)</li>
+      <li>Max-Cut graph problems (network partitioning, VLSI circuit placement)</li>
+      <li>Job shop scheduling (assign N jobs to M machines with constraints)</li>
+      <li><span class="hl-y">Drug/molecule selection</span> (select K candidates from scored library)</li>
+      <li>Logistics route optimization (subset of stops to cover under budget)</li>
+    </ul>
+
+    <div class="box box-yellow">
+      <span class="box-label" style="color:var(--accent-orange);">⚠️ When NOT to use QAOA</span>
+      <p>QAOA needs the problem formulated as QUBO (binary variables, quadratic terms only). Continuous variables, complex constraints, or huge problem sizes (>50 binary vars) → use classical solvers instead for now. QAOA shines on near-term quantum hardware experiments.</p>
+    </div>
+
+    <!-- ── NEW EXAMPLE ── -->
+    <hr class="divider">
+
+    <div class="tape tape-blue">✦ New Example: PK Database Optimization</div>
+
+    <div class="example-block">
+      <span class="example-tag blue">🔬 QAOA Applied — PK Database</span>
+
+      <h2 class="blue" style="margin-top:14px;">Problem Setup</h2>
+      <p>You have a <strong>pharmacokinetics (PK) database</strong> with 10 candidate compounds. Each compound has measured PK properties from in-vitro assays. You want to <strong>select the top 2–3 molecules</strong> for expensive in-vivo studies, balancing multiple PK criteria.</p>
+
+      <div class="formula">
+        <span class="label">// PK properties per compound (normalized 0–1):</span>
+        oral_bioavailability_i    → want HIGH  (weight: 3.0)
+        plasma_half_life_i        → want ~4-8h  (window desirability)
+        clearance_i               → want LOW   (weight: 2.0)
+        cmax_safety_margin_i      → want HIGH  (weight: 2.5)
+        protein_binding_i         → want < 0.95 (desirability)
+
+        compound_score_i = 3.0 * bioavail_i
+                         + 2.0 * (1 - clearance_i)
+                         + 2.5 * safety_i
+                         + 1.5 * half_life_desirability_i
+      </div>
+
+      <h2 class="blue">QUBO Formulation</h2>
+
+      <div class="formula">
+        <span class="label">// Binary variable: x_i = 1 if compound i is selected</span>
+        maximize  Σ score_i · x_i
+        subject to  Σ x_i = 2  (or = 3)
+
+        → QUBO form (penalty P = 5 · max_score):
+        minimize  −Σ score_i · x_i  +  P · (Σ x_i − 2)²
+
+        Expansion:  P · (Σ x_i − 2)²
+                  = P · Σ x_i²  +  2P · Σᵢ﹤ⱼ x_i·x_j  −  4P · Σ x_i  +  4P
+        (since x_i² = x_i for binary vars)
+      </div>
+
+      <h2 class="blue">QAOA Workflow</h2>
+      <div class="diagram"><span class="diagram-title">// Step-by-step for PK selection</span>
+Step 1:  Score compounds from PK database
+          [C1:0.82, C2:0.61, C3:0.74, C4:0.90, C5:0.55,
+           C6:0.78, C7:0.66, C8:0.88, C9:0.71, C10:0.60]
+
+Step 2:  Build QuadraticProgram (qiskit_optimization)
+          → add binary vars x0..x9
+          → set objective: maximize Σ score_i · x_i
+          → add constraint: Σ x_i == 2
+
+Step 3:  Convert to QUBO via QuadraticProgramToQubo
+          → constraint becomes penalty in objective
+          → result: 10x10 Q matrix (upper triangular)
+
+Step 4:  Build QAOA circuit (p=2 or p=3 layers)
+          → H gates on all 10 qubits (superposition)
+          → Cost unitaries encode Q matrix
+          → Mixer unitaries (Rx rotations)
+
+Step 5:  COBYLA tunes γ=(γ₁,γ₂), β=(β₁,β₂)
+          → minimize ⟨ψ(γ,β)|H_QUBO|ψ(γ,β)⟩
+
+Step 6:  Sample 4096 bitstrings from final state
+          → most probable valid bitstring = selection
+          e.g.  "0001000100"  →  C4 + C8 selected ✓</div>
+
+      <div class="box box-green">
+        <span class="box-label" style="color:var(--accent-green);">✅ Output</span>
+        <p>QAOA picks <strong>C4 (score 0.90)</strong> and <strong>C8 (score 0.88)</strong> — the pair that satisfies exactly K=2 and maximizes combined PK score. Compare against brute-force (C₂₁₀ = 45 combinations) to verify quality.</p>
+      </div>
+    </div>
+
+  </div>
+  <div class="page-num">pg. 1</div>
+</div>
+
+
+<!-- ═══════════════════════════════ PAGE 2 — SA / PT ════════════════ -->
+<div class="page">
+  <div class="hole" style="top:50%; left:18px; transform:translateY(-50%); position:absolute; width:22px; height:22px; border-radius:50%; background:#d4c5a9; border:2px solid #b8a88a; box-shadow:inset 1px 1px 4px rgba(0,0,0,0.2);"></div>
+
+  <div class="page-inner">
+
+    <div class="algo-header sa">
+      <span class="algo-badge badge-green">② SA/PT</span>
+      <span class="algo-title">Simulated Annealing &amp; Parallel Tempering</span>
+    </div>
+
+    <!-- ── SIMULATED ANNEALING ── -->
+    <h2 class="green">Simulated Annealing — Fundamentals</h2>
+
+    <div class="box box-green">
+      <span class="box-label" style="color:var(--accent-green);">💡 Core Idea</span>
+      <p>SA is a <strong>probabilistic metaheuristic</strong> inspired by how metals slowly cool. When hot: accept worse moves freely (explore). As temperature drops: only accept improvements (exploit). This <em>controlled cooling</em> lets it escape local minima that trap greedy hill-climbers.</p>
+    </div>
+
+    <div class="formula">
+      <span class="label">// Acceptance rule (Metropolis criterion):</span>
+      ΔE = E(new_state) − E(current_state)
+
+      if ΔE < 0:   always accept  (new state is better)
+      else:        accept with probability  exp(−ΔE / T)
+
+      T decreases each iteration:  T(k) = T₀ · α^k   (α ≈ 0.995)
+
+      When T is HIGH → exp(−ΔE/T) ≈ 1  → accept almost anything
+      When T is LOW  → exp(−ΔE/T) ≈ 0  → only accept improvements
+    </div>
+
+    <div class="diagram"><span class="diagram-title">// SA Algorithm (pseudocode)</span>
+state  ← random valid initial state
+T      ← T_start (e.g. 100.0)
+best   ← state
+
+for k in range(max_iterations):
+    candidate ← perturb(state)          # e.g. swap two elements
+    ΔE        ← cost(candidate) - cost(state)
+
+    if ΔE < 0  or  random() < exp(-ΔE / T):
+        state ← candidate
+
+    if cost(state) < cost(best):
+        best ← state
+
+    T ← T * α                           # cool down
+
+return best</div>
+
+    <!-- ── PARALLEL TEMPERING ── -->
+    <h2 class="green" style="margin-top:22px;">Parallel Tempering (PT) — the upgrade</h2>
+
+    <p>PT runs <strong>multiple SA chains simultaneously at different temperatures</strong>. Periodically, chains at adjacent temperatures attempt to <em>swap states</em> (Replica Exchange). Hot chains explore; cold chains exploit. Swaps allow good solutions found by hot chains to "sink" to cold chains.</p>
+
+    <div class="formula">
+      <span class="label">// PT swap acceptance between chain i (T_i) and chain j (T_j), T_i < T_j:</span>
+      P(swap) = min(1,  exp[(E_i − E_j) · (1/T_i − 1/T_j)])
+
+      Intuition: if swapping gives the colder chain a better state → always swap
+      Otherwise → swap probabilistically (thermodynamic balance)
+    </div>
+
+    <div class="diagram"><span class="diagram-title">// PT — multiple replicas running in parallel</span>
+                ←──── Temperature ────→
+Chain 1 [T=0.5]  [T=1.0]  [T=2.0]  [T=5.0]  ← hottest: explores freely
+         ↑ "cold"                   ↑ "hot"
+
+Each chain runs SA independently.
+Every N_swap steps → try replica exchange between adjacent T chains:
+
+ [Cold: state_A, E=−10]  ⇌  [Hot: state_B, E=−6]
+
+ If swap accepted: Cold gets state_B, Hot gets state_A
+ → good structures "percolate down" to cold chains</div>
+
+    <h2 class="green">How people use SA / PT</h2>
+    <ul>
+      <li>SA: quick classical baseline for any binary/combinatorial problem</li>
+      <li>PT: protein structure prediction (finding lowest energy conformations)</li>
+      <li>PT: hyperparameter optimization over large search spaces</li>
+      <li>PT: <span class="hl-g">lead optimization in drug discovery</span> — finding optimal SMILES edits</li>
+      <li>SA: VLSI placement, scheduling, neural architecture search</li>
+    </ul>
+
+    <div class="box box-yellow">
+      <span class="box-label" style="color:var(--accent-orange);">📌 SA vs PT — when to choose</span>
+      <p>SA is simpler and good enough for moderate problem sizes. PT is worth the added complexity when the energy landscape is <strong>rugged</strong> (many local minima) or when you have parallel compute available. In pharma: SA for fast screening, PT for thorough lead optimization.</p>
+    </div>
+
+    <!-- ── NEW EXAMPLE ── -->
+    <hr class="divider">
+
+    <div class="tape tape-green">✦ New Example: Clinical Trial Site Selection</div>
+
+    <div class="example-block">
+      <span class="example-tag green">🏥 PT Applied — Phase II Site Selection</span>
+
+      <h2 class="green" style="margin-top:14px;">Problem Setup</h2>
+      <p>You have <strong>20 candidate hospital sites</strong> for a Phase II clinical trial. You need to choose <strong>6–8 sites</strong> that maximize patient recruitment while satisfying diversity, logistics, and cost constraints. The energy landscape is rugged: sites interact (overlapping patient catchments) — perfect for PT.</p>
+
+      <div class="formula">
+        <span class="label">// State = binary vector s ∈ {0,1}²⁰ (1 = site selected)</span>
+
+        cost(s) =  − Σ recruitment_i · s_i          // maximize recruitment
+                   − λ₁ · diversity_score(s)         // reward diverse geography
+                   + λ₂ · Σ overlap(i,j) · s_i · s_j // penalize patient overlap
+                   + λ₃ · total_cost(s)               // penalize budget overrun
+                   + P · max(0, Σ s_i − 8)²           // hard cap: ≤8 sites
+
+        Perturbation: flip one s_i  OR  swap one selected/unselected pair
+      </div>
+
+      <h2 class="green">PT Setup (4 replicas)</h2>
+      <div class="diagram"><span class="diagram-title">// Parallel Tempering configuration</span>
+Replica 1: T = 0.5   (cold  — refines good solutions)
+Replica 2: T = 1.5   (warm)
+Replica 3: T = 4.0   (hot)
+Replica 4: T = 10.0  (very hot — escapes any local min)
+
+Each replica:
+  - starts from different random valid selection
+  - runs 5000 SA steps per "epoch"
+
+Every epoch:
+  - try swap: Replica 1 ↔ Replica 2 (Metropolis swap rule)
+  - try swap: Replica 2 ↔ Replica 3
+  - try swap: Replica 3 ↔ Replica 4
+
+After 200 epochs:  best state from Replica 1 = final selection</div>
+
+      <div class="box box-blue">
+        <span class="box-label" style="color:var(--accent-blue);">🔍 Why PT matters here</span>
+        <p>Site interactions (patient overlap penalties) create a rugged landscape. Pure SA often gets stuck choosing e.g. 5 sites in one region. PT's hot replicas discover that a cluster of 3 remote sites unlocks 40% more unique patients — this insight percolates down to the cold chain through replica exchange.</p>
+      </div>
+
+      <h2 class="green">Code sketch</h2>
+      <div class="diagram"><span class="diagram-title">// Python sketch</span>
+replicas = [State(T=0.5), State(T=1.5), State(T=4.0), State(T=10.0)]
+
+for epoch in range(200):
+    for rep in replicas:
+        rep.run_sa_steps(n=5000, cost_fn=site_cost)
+
+    # Replica exchange (adjacent pairs)
+    for i in range(len(replicas)-1):
+        r1, r2 = replicas[i], replicas[i+1]
+        ΔE = r2.cost - r1.cost
+        ΔB = (1/r1.T) - (1/r2.T)       # β = 1/T
+        if random() < exp(ΔE * ΔB):
+            r1.state, r2.state = r2.state, r1.state
+
+best_sites = replicas[0].best_state     # coldest replica = best answer</div>
+    </div>
+
+  </div>
+  <div class="page-num">pg. 2</div>
+</div>
+
+
+<!-- ═══════════════════════════════ PAGE 3 — VQE ════════════════════ -->
+<div class="page">
+  <div class="hole" style="top:50%; left:18px; transform:translateY(-50%); position:absolute; width:22px; height:22px; border-radius:50%; background:#d4c5a9; border:2px solid #b8a88a; box-shadow:inset 1px 1px 4px rgba(0,0,0,0.2);"></div>
+
+  <div class="page-inner">
+
+    <div class="algo-header vqe">
+      <span class="algo-badge badge-purple">③ VQE</span>
+      <span class="algo-title">Variational Quantum Eigensolver</span>
+    </div>
+
+    <!-- ── WHAT IS IT ── -->
+    <h2 class="purple">What is it, fundamentally?</h2>
+
+    <div class="box box-pink">
+      <span class="box-label" style="color:var(--accent-purple);">💡 Core Idea</span>
+      <p>VQE is a <strong>hybrid quantum-classical algorithm for quantum chemistry</strong>. It uses the <em>variational principle</em>: for any trial quantum state |ψ(θ)⟩, the expectation value ⟨ψ(θ)|H|ψ(θ)⟩ is always ≥ the true ground-state energy E₀. So minimize ⟨H⟩ over θ and you get as close to E₀ as your ansatz allows.</p>
+    </div>
+
+    <p>Key difference from QAOA: VQE solves a <strong>physics problem</strong> (find lowest energy of a molecule) not a <strong>combinatorial problem</strong> (pick best items). The Hamiltonian here is the <em>electronic structure Hamiltonian</em> — real quantum mechanics, not a QUBO.</p>
+
+    <div class="formula">
+      <span class="label">// Variational principle — the math foundation:</span>
+      E₀  ≤  ⟨ψ(θ) | H | ψ(θ)⟩    for ANY trial state |ψ(θ)⟩
+
+      VQE: find θ* = argmin_θ  ⟨ψ(θ)|H|ψ(θ)⟩
+
+      Ansatz (UCCSD):  |ψ(θ)⟩ = exp(T(θ) − T†(θ)) |HF⟩
+        - |HF⟩   = Hartree-Fock reference state
+        - T(θ)   = single + double excitation operators
+        - θ      = amplitudes tuned by classical optimizer (SLSQP)
+    </div>
+
+    <div class="diagram"><span class="diagram-title">// VQE Pipeline — step by step</span>
+Molecule geometry (e.g. H₂, water, ligand fragment)
+    │
+    ▼  PySCFDriver  →  Molecular Hamiltonian (fermionic operators)
+    │
+    ▼  ActiveSpaceTransformer  →  freeze core electrons (keep 2e, 2 orbitals)
+    │                              reduces qubit count dramatically
+    ▼  ParityMapper  →  fermionic ops → qubit Pauli operators
+    │                   parity mapping: saves 2 more qubits
+    ▼  UCCSD Ansatz  →  parameterized circuit |ψ(θ)⟩
+    │
+    ▼  StatevectorEstimator  →  measures ⟨ψ(θ)|H|ψ(θ)⟩  on quantum sim
+    │
+    ▼  SLSQP optimizer  →  updates θ to reduce energy
+    │
+    ▼  Converged?  → Yes → ground state energy E_VQE
+    │
+    ▼  NumPyMinimumEigensolver  →  exact answer E_exact
+         |E_VQE − E_exact|  should be < 1 millihartree ✓</div>
+
+    <h2 class="purple">How people use VQE</h2>
+    <ul>
+      <li>Estimate ground-state energy of small molecules (H₂, LiH, BeH₂)</li>
+      <li>Compare binding energies of different conformers</li>
+      <li>Study reaction barriers (transition state energies)</li>
+      <li>Screen functional materials (battery electrolytes, catalysts)</li>
+      <li><span class="hl-p">Rank ligand-receptor interaction fragments</span> by computed stability</li>
+    </ul>
+
+    <div class="box box-yellow">
+      <span class="box-label" style="color:var(--accent-orange);">⚠️ Current limitations</span>
+      <p>VQE on today's hardware needs active space reduction to ≤12 qubits — otherwise circuit depth overwhelms coherence time. On a simulator: up to ~20 qubits tractable. The UCCSD ansatz is chemistry-motivated and works well, but needs good Hartree-Fock starting state.</p>
+    </div>
+
+    <!-- ── NEW EXAMPLE ── -->
+    <hr class="divider">
+
+    <div class="tape tape-purple">✦ New Example: Fragment Binding Energy Ranking</div>
+
+    <div class="example-block">
+      <span class="example-tag purple">🧬 VQE Applied — KRAS G12C Fragment Screen</span>
+
+      <h2 class="purple" style="margin-top:14px;">Problem Setup</h2>
+      <p>You're doing <strong>fragment-based drug discovery</strong> against KRAS G12C. You have 5 small fragments identified from a crystallography screen. Each fragment binds in the same pocket. You want to <strong>rank them by electronic binding energy contribution</strong> using VQE on the fragment–cysteine interaction sub-system.</p>
+
+      <div class="box box-pink">
+        <span class="box-label" style="color:var(--accent-purple);">Why VQE? Not classical DFT?</span>
+        <p>For fragments with strong π–covalent interactions (especially covalent warheads attacking Cys12), DFT can misestimate correlation energy. VQE on the active space around the reactive bond gives a chemically accurate ground-state energy estimate. Educational demo — in practice you'd use CCSD(T) as reference.</p>
+      </div>
+
+      <h2 class="purple">Active Space Design</h2>
+      <div class="formula">
+        <span class="label">// Each fragment-Cys complex:</span>
+        Full system:   ~200 electrons, ~400 basis functions (STO-3G)
+
+        Active space:  focus on the reactive bond region only
+                       2 electrons, 2 spatial orbitals
+                       → 2 qubits after ParityMapper (saves 2)
+                       → circuit depth: shallow, laptop-runnable
+
+        Frozen: all other electrons contribute via SCF mean-field
+        Active: σ (C–S bond) and σ* (C–S antibond) only
+      </div>
+
+      <h2 class="purple">Workflow</h2>
+      <div class="diagram"><span class="diagram-title">// VQE Fragment Ranking (5 fragments)</span>
+For each fragment F in [F1, F2, F3, F4, F5]:
+
+  1. Load geometry: fragment + Cys12 sidechain (xyz coords from PDB)
+
+  2. driver = PySCFDriver(geometry=fragment_cys_xyz, basis='sto-3g')
+     problem = driver.run()
+
+  3. transformer = ActiveSpaceTransformer(num_electrons=2, num_spatial_orbitals=2)
+     reduced_problem = transformer.transform(problem)
+
+  4. mapper = ParityMapper(num_particles=reduced_problem.num_particles)
+     H_qubit = mapper.map(reduced_problem.second_q_ops()[0])
+     # H_qubit is now a 2-qubit Pauli Hamiltonian
+
+  5. ansatz = UCCSD(num_spatial_orbitals=2, num_particles=(1,1),
+                    qubit_mapper=mapper)
+     ansatz.initial_state = HartreeFock(...)
+
+  6. vqe = VQE(estimator=StatevectorEstimator(),
+               ansatz=ansatz, optimizer=SLSQP(maxiter=100))
+     result = vqe.compute_minimum_eigenvalue(H_qubit)
+     E_vqe[F] = result.eigenvalue.real   # in Hartree
+
+  7. E_exact[F] = NumPyMinimumEigensolver().compute_minimum_eigenvalue(H_qubit)
+     error[F] = |E_vqe[F] - E_exact[F].real|
+
+Ranking:  sort fragments by E_vqe (lowest = most stabilized = best binder)
+Result:   F3 < F1 < F5 < F2 < F4   →   F3 is the priority fragment</div>
+
+      <div class="arrow-note">Energy here is in Hartree. 1 Hartree ≈ 627.5 kcal/mol. Errors below 1 millihartree = "chemical accuracy".</div>
+
+      <div class="box box-green">
+        <span class="box-label" style="color:var(--accent-green);">✅ Output</span>
+        <p><strong>Fragment F3</strong> has the lowest active space energy (−1.1372 Ha vs F4 at −1.1284 Ha) → selected for further derivatization. The VQE error vs exact is &lt;0.5 millihartree for all fragments.</p>
+      </div>
+    </div>
+
+  </div>
+  <div class="page-num">pg. 3</div>
+</div>
+
+
+<!-- ═══════════════════════════════ PAGE 4 — COMPARISON ════════════ -->
+<div class="page">
+  <div class="hole" style="top:50%; left:18px; transform:translateY(-50%); position:absolute; width:22px; height:22px; border-radius:50%; background:#d4c5a9; border:2px solid #b8a88a; box-shadow:inset 1px 1px 4px rgba(0,0,0,0.2);"></div>
+
+  <div class="page-inner">
+
+    <div style="margin-top:16px; margin-bottom:20px;">
+      <span style="font-family:'Caveat Brush', cursive; font-size:2rem; color:var(--ink); transform:rotate(-1deg); display:inline-block;">Side-by-Side Comparison</span>
+      <span style="font-size:1.1rem; color:#888; margin-left:12px;">— which one do I use?</span>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Aspect</th>
+          <th style="background:var(--accent-blue);">QAOA</th>
+          <th style="background:var(--accent-green);">SA / PT</th>
+          <th style="background:var(--accent-purple);">VQE</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Problem class</strong></td>
+          <td>Combinatorial optimization</td>
+          <td>Combinatorial optimization</td>
+          <td>Quantum chemistry (eigenvalue)</td>
+        </tr>
+        <tr>
+          <td><strong>Input</strong></td>
+          <td>Scored items + constraints → QUBO</td>
+          <td>Cost function + perturbation rule</td>
+          <td>Molecular Hamiltonian (atom geometry)</td>
+        </tr>
+        <tr>
+          <td><strong>Output</strong></td>
+          <td>Selected bitstring (which items)</td>
+          <td>Best state found (which items)</td>
+          <td>Ground-state energy (Hartree)</td>
+        </tr>
+        <tr>
+          <td><strong>Variables</strong></td>
+          <td>Binary only (0/1)</td>
+          <td>Binary, discrete, or continuous</td>
+          <td>Quantum state amplitudes (continuous θ)</td>
+        </tr>
+        <tr>
+          <td><strong>Guarantee</strong></td>
+          <td>Approximate (gets better with more layers p)</td>
+          <td>Approximate (gets better with slower cooling)</td>
+          <td>Upper bound on E₀ (variational)</td>
+        </tr>
+        <tr>
+          <td><strong>Hardware</strong></td>
+          <td>Quantum circuit (gate-based)</td>
+          <td>Classical CPU/GPU</td>
+          <td>Quantum circuit (gate-based)</td>
+        </tr>
+        <tr>
+          <td><strong>Classical optimizer</strong></td>
+          <td>COBYLA / L-BFGS-B (tunes γ, β)</td>
+          <td>None (temperature schedule)</td>
+          <td>SLSQP / L-BFGS-B (tunes θ)</td>
+        </tr>
+        <tr>
+          <td><strong>Scales to large problems?</strong></td>
+          <td>Not yet (NISQ limits)</td>
+          <td>Yes — handles 1000s of variables</td>
+          <td>No — active space limits to ~20 qubits</td>
+        </tr>
+        <tr>
+          <td><strong>Pharma use case</strong></td>
+          <td>Molecule/portfolio selection under budget</td>
+          <td>Conformation search, site selection</td>
+          <td>Binding energy, reaction energy</td>
+        </tr>
+        <tr>
+          <td><strong>Pharma Example (new)</strong></td>
+          <td>PK database: pick top 2–3 compounds</td>
+          <td>Phase II site selection (PT)</td>
+          <td>KRAS G12C fragment energy ranking</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <hr class="divider">
+
+    <h2 class="orange" style="font-size:1.5rem;">Decision Guide — which to reach for?</h2>
+
+    <div class="diagram"><span class="diagram-title">// Mental model:</span>
+"I need to PICK THE BEST SUBSET from a list of options"
+    │
+    ├─ fewer than ~20 items, have quantum hardware/sim → QAOA
+    │     (encodes problem as QUBO, quantum circuit finds answer)
+    │
+    ├─ many items (50–10,000), classical compute only → SA or PT
+    │     SA: one shot, fast  |  PT: rugged landscape, parallel compute
+    │
+    └─ not a selection problem, I need to know a molecule's ENERGY
+          → VQE
+              ├─ small active space (≤12 qubits) → run on simulator
+              └─ rank molecules by stability / binding affinity</div>
+
+    <h2 class="red" style="margin-top:22px;">Common Gotchas</h2>
+
+    <div class="box box-pink">
+      <ul>
+        <li><strong>QAOA</strong>: penalty weight P must be large enough to enforce constraint, but not so large it drowns out the objective. Rule of thumb: P ≈ 5 × max(score_i).</li>
+        <li><strong>SA</strong>: choosing T_start and α is an art. Too fast cooling → stuck in local min. Too slow → wastes compute. Set T_start ≈ 10 × typical ΔE of a random move.</li>
+        <li><strong>PT</strong>: acceptance rates between replicas should be ~20–40%. If near 0 or 100%: adjust temperature spacing. Geometric spacing (T_k = T₀ · r^k, r≈1.5–3) usually works.</li>
+        <li><strong>VQE</strong>: the UCCSD ansatz can fail if the Hartree-Fock reference is a poor starting point (strongly correlated systems). Check ⟨HF|H|HF⟩ vs E_exact first.</li>
+      </ul>
+    </div>
+
+    <hr class="divider">
+
+    <div style="text-align:center; padding:20px 0 8px;">
+      <span style="font-family:'Caveat Brush', cursive; font-size:1.6rem; color:#888; transform:rotate(-0.5deg); display:inline-block;">
+        Good luck! The algorithms are tools — the problem formulation is the hard part.
+      </span>
+      <br>
+      <span style="font-size:1.1rem; color:#aaa; margin-top:8px; display:inline-block;">
+        Ref: quantum-pharma-lab · docs/architecture.md · IBM Qiskit docs
+      </span>
+    </div>
+
+  </div>
+  <div class="page-num">pg. 4</div>
+</div>
+
+</body>
+</html>
