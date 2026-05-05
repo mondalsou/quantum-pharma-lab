@@ -569,6 +569,52 @@
       Equality constraint → QUBO penalty term:  +P · (Σ x_i − K)²
     </div>
 
+    <!-- ── PSI SECTION ── -->
+    <h2 class="blue" style="margin-top:26px;">What is |ψ(γ,β)⟩ — and what are we actually solving?</h2>
+
+    <div class="box box-blue">
+      <span class="box-label" style="color:var(--accent-blue);">📌 In this repo's problem</span>
+      <p>We have <strong>8 ESOL candidate molecules</strong>. We want to <strong>select exactly 3</strong> that maximise a combined score (predicted solubility + descriptor desirability). Each possible selection can be written as a binary string of length 8 — e.g. <em>|00010011⟩</em> means "select molecules 3, 4 and 8". There are 2⁸ = 256 such bitstrings, but only C(8,3) = 56 are valid (exactly 3 selected).</p>
+    </div>
+
+    <p><strong>|ψ(γ,β)⟩</strong> is the quantum state the circuit builds and holds. It is a <em>superposition over all 256 bitstrings at once</em>, each carrying a complex amplitude. It is <span class="und-r">not the answer</span> — it is the vehicle the quantum computer uses to find the answer.</p>
+
+    <div class="formula">
+      <span class="label">// The quantum state at any point in the circuit:</span>
+      |ψ(γ,β)⟩  =  Σₓ  αₓ(γ,β) · |x⟩
+
+        x      = one bitstring, e.g. |00010011⟩
+        αₓ     = complex amplitude of that bitstring
+        |αₓ|²  = probability of measuring x
+
+      γ, β are the parameters COBYLA tunes to make
+      the right bitstring's amplitude as large as possible.
+    </div>
+
+    <p>The <strong>goal</strong> is a classical bitstring — e.g. <em>|00010011⟩</em> meaning "select molecules 3, 4, 8". That bitstring lives outside the quantum computer, in your measurement result. <strong>|ψ⟩ is the vehicle. The bitstring is the destination.</strong></p>
+
+    <div class="formula">
+      <span class="label">// The full journey in one line:</span>
+      |ψ(γ,β)⟩  →  measure  →  bitstring  →  decode  →  selected molecules
+       (quantum state)          (classical)              (your answer)
+    </div>
+
+    <div class="box box-yellow">
+      <span class="box-label" style="color:var(--accent-orange);">🔗 How the pieces connect</span>
+      <ul style="margin-top:4px;">
+        <li>The <strong>optimization problem is classical</strong>: maximize Σ score_i · x_i subject to Σ x_i = 3</li>
+        <li>QAOA <strong>encodes that into H_cost</strong>: each bitstring's amplitude gets phase-shifted by its score</li>
+        <li><strong>|ψ(γ,β)⟩ gets shaped</strong> by alternating cost and mixer layers so the best bitstring accumulates the most amplitude</li>
+        <li>You <strong>measure</strong> and the superposition collapses — the bitstring that comes out is your selection</li>
+        <li>The classical optimizer (COBYLA) <strong>tunes γ and β</strong> across many circuit runs to maximise the chance of measuring the right answer</li>
+      </ul>
+    </div>
+
+    <div class="box box-green">
+      <span class="box-label" style="color:var(--accent-green);">🎬 See it as waves</span>
+      <p>The five steps above — superposition → phase shift → mixer → p layers → measure — are exactly what the wave animation shows. Each wave is one basis state. The animation shows how |ψ⟩ gets shaped until the right bitstring dominates. <a href="docs/qaoa_wave_explainer.html" style="color:var(--accent-blue); text-decoration:underline; font-weight:600;">Open the interactive wave explainer →</a></p>
+    </div>
+
     <!-- ── HOW PEOPLE USE IT ── -->
     <h2 class="blue" style="margin-top:26px;">How people normally use QAOA</h2>
 

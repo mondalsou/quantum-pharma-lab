@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How QAOA Works Through Waves</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    background:#0d1117; color:#e6edf3;
+    font-family:'Segoe UI',system-ui,sans-serif;
+    padding:16px 16px 76px;
+  }
+  h2.sr-only { position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0); }
+
+  .title    { text-align:center; font-size:1.08rem; font-weight:600; color:#58a6ff; margin-bottom:3px; }
+  .subtitle { text-align:center; font-size:0.75rem; color:#8b949e; margin-bottom:14px; }
+
+  .steps-nav {
+    display:flex; gap:6px; margin-bottom:14px;
+    justify-content:center; flex-wrap:wrap;
+  }
+  .step-btn {
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+    background:#161b22; border:1px solid #30363d;
+    border-radius:8px; padding:7px 11px;
+    cursor:pointer; font-family:inherit; transition:all 0.18s;
+    min-width:90px;
+  }
+  .step-num  { font-size:0.72rem; font-weight:700; color:#8b949e; text-transform:uppercase; letter-spacing:0.5px; }
+  .step-name { font-size:0.76rem; color:#c9d1d9; line-height:1.2; text-align:center; }
+  .step-btn:hover { border-color:#388bfd; background:#1c2433; }
+  .step-btn.active {
+    border-color:#388bfd; background:#132035;
+    box-shadow:0 0 0 1px #388bfd, 0 0 10px rgba(56,139,253,0.35);
+  }
+  .step-btn.active .step-num  { color:#58a6ff; }
+  .step-btn.active .step-name { color:#e6edf3; font-weight:600; }
+
+  .card { background:#161b22; border:1px solid #30363d; border-radius:10px; padding:14px 16px 10px; margin-bottom:10px; }
+  .card-label { font-size:0.67rem; text-transform:uppercase; letter-spacing:1.2px; color:#8b949e; margin-bottom:8px; }
+  canvas { display:block; width:100%; border-radius:4px; }
+
+  .explain {
+    background:#0d1117; border:1px solid #30363d; border-left:3px solid #1f6feb;
+    border-radius:6px; padding:11px 14px; font-size:0.80rem; line-height:1.68;
+    color:#c9d1d9; margin-bottom:10px; min-height:64px;
+  }
+  .explain strong { color:#58a6ff; }
+  .explain .good  { color:#3fb950; }
+  .explain .bad   { color:#f85149; }
+  .explain .phase { color:#d2a8ff; }
+  .explain .warn  { color:#f0883e; font-weight:600; }
+
+  .equal-note {
+    background:#1a1f2e; border:1px dashed #30363d; border-radius:6px;
+    padding:7px 12px; font-size:0.74rem; color:#8b949e; text-align:center;
+    margin-bottom:9px; display:none;
+  }
+  .equal-note.show { display:block; }
+  .equal-note span { color:#f0883e; font-weight:600; }
+
+  .legend { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; margin-bottom:9px; }
+  .leg-item { display:flex; align-items:center; gap:5px; font-size:0.73rem; color:#8b949e; }
+  .leg-dot  { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+
+  .prob-row { display:flex; align-items:center; gap:9px; margin-bottom:6px; }
+  .prob-label { font-size:0.76rem; font-family:'Courier New',monospace; color:#e6edf3; width:36px; text-align:right; flex-shrink:0; }
+  .prob-bar-bg { flex:1; background:#0d1117; border-radius:3px; height:17px; overflow:hidden; border:1px solid #21262d; }
+  .prob-bar-fill { height:100%; border-radius:3px; transition:width 0.55s ease; }
+  .prob-val { font-size:0.70rem; color:#8b949e; width:36px; flex-shrink:0; }
+  .score-tag { font-size:0.66rem; padding:1px 6px; border-radius:10px; margin-left:3px; white-space:nowrap; }
+  .score-good { background:#0f3d1a; color:#3fb950; border:1px solid #238636; }
+  .score-bad  { background:#3d0f0f; color:#f85149; border:1px solid #da3633; }
+
+  .controls {
+    position:fixed; bottom:0; left:0; right:0;
+    background:#161b22; border-top:1px solid #30363d;
+    display:flex; justify-content:center; align-items:center;
+    gap:10px; padding:9px 20px; z-index:100;
+  }
+  .btn {
+    background:#21262d; border:1px solid #30363d; color:#e6edf3;
+    padding:7px 22px; border-radius:6px; cursor:pointer;
+    font-size:0.84rem; font-family:inherit; font-weight:500;
+    transition:background 0.15s; min-width:80px;
+  }
+  .btn:hover { background:#30363d; }
+  .btn.primary { background:#238636; border-color:#238636; color:#fff; }
+  .btn.primary:hover { background:#2ea043; }
+  .btn:disabled { opacity:0.3; cursor:not-allowed; }
+  .step-counter { font-size:0.77rem; color:#8b949e; min-width:44px; text-align:center; }
+</style>
+</head>
+<body>
+<h2 class="sr-only">QAOA wave interference interactive explainer</h2>
+
+<div class="title">How QAOA Works Through Waves</div>
+<div class="subtitle">2 qubits · 4 possible answers · amplitudes only change when the mixer runs</div>
+
+<div class="steps-nav" id="stepsNav"></div>
+
+<div class="card">
+  <div class="card-label" id="canvas-label"></div>
+  <canvas id="waveCanvas"></canvas>
+</div>
+
+<div class="equal-note" id="equalNote">
+  ⚠️ <span>All probabilities still 25%</span> — cost Hamiltonian only shifts phase, not amplitude
+</div>
+
+<div class="explain" id="explain"></div>
+
+<div class="legend">
+  <div class="leg-item"><div class="leg-dot" style="background:#58a6ff"></div>|00⟩ score 0.3</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#d2a8ff"></div>|01⟩ score 0.6</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#3fb950"></div>|10⟩ score 0.9</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#f85149"></div>|11⟩ score 0.1</div>
+</div>
+
+<div class="card" style="margin-top:0;">
+  <div class="card-label">Probability of measuring each answer</div>
+  <div id="probBars"></div>
+</div>
+
+<div class="controls">
+  <button class="btn" id="prevBtn">← Prev</button>
+  <span class="step-counter" id="stepCounter">1 / 5</span>
+  <button class="btn primary" id="nextBtn">Next →</button>
+  <button class="btn" id="animBtn">▶ Animate</button>
+</div>
+
+<script>
+const canvas = document.getElementById('waveCanvas');
+const ctx    = canvas.getContext('2d');
+
+const STATES = [
+  { label:'|00⟩', color:'#58a6ff' },
+  { label:'|01⟩', color:'#d2a8ff' },
+  { label:'|10⟩', color:'#3fb950' },
+  { label:'|11⟩', color:'#f85149' },
+];
+
+const WAVE_H = 24;
+const Y_POS  = [50, 96, 146, 194];
+const C_H    = 240;
+
+const STEPS = [
+  {
+    num:'①', name:'Superposition',
+    label:'① All 4 waves — equal height, equal phase',
+    phase:[0,0,0,0], amp:[1,1,1,1], prob:[25,25,25,25],
+    showTags:false, equalNote:false,
+    explain:`<strong>Superposition</strong> — Hadamard gates create an equal superposition of all 4 basis states. Every wave has <em>identical height and identical phase</em>. Probability = 25% each. No answer is preferred. All 4 possibilities exist simultaneously inside the quantum computer.`
+  },
+  {
+    num:'②', name:'Cost → phase only',
+    label:'② Cost Hamiltonian — phases shift, amplitudes UNCHANGED',
+    phase:[0.6,1.2,1.8,0.2], amp:[1,1,1,1], prob:[25,25,25,25],
+    showTags:false, equalNote:true,
+    explain:`<strong>Cost Hamiltonian</strong> — the operator <span class="phase">e<sup>−iγC(x)</sup></span> is diagonal in the computational basis. It can only rotate the <em>phase</em> of each wave — it cannot move amplitude between states. All 4 waves stay the same height. <span class="warn">Probabilities are still 25% each — no best or worst yet.</span>`
+  },
+  {
+    num:'③', name:'Mixer → amps change',
+    label:'③ Mixer applied — first moment amplitudes start to split',
+    phase:[0.9,1.5,2.4,0.3], amp:[0.82,0.94,1.28,0.62], prob:[17,22,41,20],
+    showTags:true, equalNote:false,
+    explain:`<strong>Mixer Hamiltonian</strong> — X-rotations couple all basis states together. Because the waves now have <em>different phases</em>, their interaction causes some to reinforce and some to partly cancel. <em>First moment</em> amplitudes become unequal. <span class="good">|10⟩ grows (41%)</span>. <span class="bad">|11⟩ shrinks (20%)</span>. <strong>All 4 waves are still present.</strong> Interference redistributes amplitude; it does not delete states.`
+  },
+  {
+    num:'④', name:'After p layers',
+    label:'④ After p layers — interference compounds each round',
+    phase:[1.2,2.0,3.1,0.5], amp:[0.50,0.72,1.72,0.22], prob:[6,13,74,7],
+    showTags:true, equalNote:false,
+    explain:`<strong>p layers of Cost → Mixer</strong> — each round sharpens the result. <span class="good">|10⟩ dominates (~74%)</span>, the others are small but <strong>still present</strong> with non-zero amplitudes. If unlucky you could still measure |00⟩ or |11⟩ — that's why you sample many shots and take the most frequent answer.`
+  },
+  {
+    num:'⑤', name:'Measure',
+    label:'⑤ Measurement — superposition collapses to one bitstring',
+    phase:[0,0,0,0], amp:[0.16,0.36,1.97,0.16], prob:[1,3,95,1],
+    showTags:true, equalNote:false,
+    explain:`<strong>Measurement</strong> — the superposition collapses to a single bitstring. Probability = <span class="phase">|amplitude|²</span>. With <span class="good">|10⟩</span> carrying nearly all the amplitude, you almost certainly read <span class="good">|10⟩</span>. The other three waves are tiny but non-zero — sample enough shots and you'll occasionally still see them.`
+  },
+];
+
+const nav = document.getElementById('stepsNav');
+STEPS.forEach((s, i) => {
+  const btn = document.createElement('button');
+  btn.className = 'step-btn' + (i===0?' active':'');
+  btn.dataset.step = i;
+  btn.innerHTML = `<span class="step-num">${s.num}</span><span class="step-name">${s.name}</span>`;
+  btn.addEventListener('click', () => { step = i; updateUI(); });
+  nav.appendChild(btn);
+});
+
+let step=0, animT=0, animId=null, isAnim=false;
+
+function getW(){ return parseInt(canvas.style.width)||660; }
+
+function resizeCanvas(){
+  const W = canvas.parentElement.clientWidth - 32;
+  canvas.width  = W * devicePixelRatio;
+  canvas.height = C_H * devicePixelRatio;
+  canvas.style.width  = W+'px';
+  canvas.style.height = C_H+'px';
+  ctx.scale(devicePixelRatio, devicePixelRatio);
+  draw();
+}
+
+function drawWave(phase, amp, color, yC, W, t, label, alpha){
+  ctx.save();
+  ctx.globalAlpha = alpha??1;
+  ctx.strokeStyle = color;
+  ctx.lineWidth   = 2;
+  ctx.shadowColor = color;
+  ctx.shadowBlur  = amp>1.3?10:4;
+  ctx.beginPath();
+  for(let x=18; x<=W-18; x++){
+    const prog=(x-18)/(W-36);
+    const y=yC - amp*WAVE_H*Math.sin(2*Math.PI*prog*2.5+phase+t);
+    x===18?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+  ctx.shadowBlur=0;
+  ctx.font='600 11px "Courier New",monospace';
+  ctx.fillStyle=color;
+  ctx.fillText(label, 22, Math.max(yC - amp*WAVE_H - 5, 11));
+  ctx.restore();
+}
+
+function draw(){
+  const W=getW();
+  ctx.clearRect(0,0,W,C_H);
+  ctx.strokeStyle='#1c2128'; ctx.lineWidth=0.5;
+  for(let y=0;y<C_H;y+=28){ ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke(); }
+
+  const S=STEPS[step];
+  for(let i=0;i<4;i++){
+    const ghost=step===4&&i!==2;
+    drawWave(S.phase[i],S.amp[i],STATES[i].color,Y_POS[i],W,animT,STATES[i].label,ghost?0.12:1);
+  }
+  if(step===1){
+    for(let i=0;i<4;i++){
+      ctx.save(); ctx.font='10px "Courier New",monospace';
+      ctx.fillStyle=STATES[i].color; ctx.globalAlpha=0.6;
+      ctx.fillText('φ='+S.phase[i].toFixed(1),W-72,Y_POS[i]+4); ctx.restore();
+    }
+    ctx.save(); ctx.font='bold 10px sans-serif';
+    ctx.fillStyle='#f0883e'; ctx.globalAlpha=0.7;
+    ctx.fillText('← all equal height',W/2-30,C_H-8); ctx.restore();
+  }
+  if(step>=3){
+    ctx.save(); ctx.font='bold 11px "Courier New",monospace';
+    ctx.fillStyle='#3fb950'; ctx.globalAlpha=0.85;
+    ctx.fillText(step===4?'▶ SELECTED':'▲ leading', W-105, Y_POS[2]-S.amp[2]*WAVE_H-16);
+    ctx.restore();
+  }
+}
+
+function buildBars(){
+  const S=STEPS[step];
+  const C=['#58a6ff','#d2a8ff','#3fb950','#f85149'];
+  document.getElementById('probBars').innerHTML=STATES.map((st,i)=>{
+    const p=S.prob[i];
+    let tag='';
+    if(S.showTags){
+      if(i===2&&p>30) tag='<span class="score-tag score-good">↑ best</span>';
+      if(i===3&&p<15) tag='<span class="score-tag score-bad">↓ worst</span>';
+    }
+    return '<div class="prob-row"><span class="prob-label">'+st.label+'</span><div class="prob-bar-bg"><div class="prob-bar-fill" style="width:'+p+'%;background:'+C[i]+';opacity:0.85;"></div></div><span class="prob-val">'+p+'%</span>'+tag+'</div>';
+  }).join('');
+}
+
+function updateUI(){
+  const S=STEPS[step];
+  document.querySelectorAll('.step-btn').forEach((b,i)=>b.classList.toggle('active',i===step));
+  document.getElementById('explain').innerHTML=S.explain;
+  document.getElementById('canvas-label').textContent=S.label;
+  document.getElementById('equalNote').classList.toggle('show',S.equalNote);
+  document.getElementById('stepCounter').textContent=(step+1)+' / 5';
+  document.getElementById('prevBtn').disabled=step===0;
+  document.getElementById('nextBtn').disabled=step===4;
+  buildBars();
+}
+
+function animate(){ animT+=0.025; draw(); animId=requestAnimationFrame(animate); }
+function startAnim(){ if(!isAnim){ isAnim=true; document.getElementById('animBtn').textContent='⏸ Pause'; animate(); } }
+function stopAnim(){  isAnim=false; document.getElementById('animBtn').textContent='▶ Animate'; cancelAnimationFrame(animId); }
+
+document.getElementById('nextBtn').addEventListener('click',()=>{ if(step<4){step++;updateUI();} });
+document.getElementById('prevBtn').addEventListener('click',()=>{ if(step>0){step--;updateUI();} });
+document.getElementById('animBtn').addEventListener('click',()=>isAnim?stopAnim():startAnim());
+
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas(); updateUI(); startAnim();
+</script>
+</body>
+</html>
