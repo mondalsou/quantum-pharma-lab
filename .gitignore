@@ -4,4 +4,8 @@ __pycache__/
 *.pyc
 *.DS_Store
 data/*.csv
-
+docs/PRD.md
+notebooks/vqe_esol_active_space_demo.ipynb
+algorithm_notes.html
+.claude/
+docs/architecture.md
