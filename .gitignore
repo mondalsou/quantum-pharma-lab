@@ -8,3 +8,4 @@ docs/PRD.md
 notebooks/vqe_esol_active_space_demo.ipynb
 .claude/
 docs/architecture.md
+algorithm_notes.html
